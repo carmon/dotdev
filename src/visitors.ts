@@ -6,7 +6,7 @@ type SiteVisitorsSchema = {
 }
 
 const DB_NAME = process.env.DB_NAME;
-const DB_COLLECTION = process.env.DB_COLLECTION;
+const DB_COLLECTION = process.env.DB_COLLECTION || '';
 const SITE = process.env.SITE;
 
 export async function getVisitorCount(): Promise<number | null> {
@@ -30,7 +30,9 @@ export async function setVisitorCount(count: number): Promise<void> {
 
 export async function visitorTick(): Promise<number | null> {
   let count = await getVisitorCount();
-  count += 1; 
-  if (process.env.NODE_ENV === 'production') await setVisitorCount(count);
+  if (count !== null) {
+    count += 1; 
+    if (process.env.NODE_ENV === 'production') await setVisitorCount(count);
+  }
   return count;
 }

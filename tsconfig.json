@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES5",
+    "target": "ES2022",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./src"]
   },
+  "include": ["api/**/*.ts", "src/**/*.ts", "src/**/*.d.ts"]
 }

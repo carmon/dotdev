@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Carmon's Personal Website, 2025 edition" />
+    <meta name="description" content="Carmon's Personal Website" />
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
     <script src="./js/limitLoop.js"></script>
     <title>Carmon.DEV</title>
@@ -189,7 +189,17 @@
         <img src="./static/qr.svg" style="margin-top: 4px; margin-bottom: 4px;" />
       </details>
       <footer>
-        ©Copyright 2025. Made by Carmon with <a href="http://htmx.org" target="_blank">HTMX</a> and <a href="http://vercel.com" target="_blank">vercel</a>. Check the repository <a href="https://github.com/carmon/dotenv2025" target="_blank">here</a>.
+        ©Copyright 2026. Made by Carmon with <a href="http://htmx.org" target="_blank">HTMX</a> and <a href="http://vercel.com" target="_blank">vercel</a>. Repository <a href="https://github.com/carmon/dotdev" target="_blank">here</a>. Build <span id="build-number">loading...</span>.
+        <script>
+          fetch('/api/build-info')
+            .then(r => r.json())
+            .then(d => {
+              document.getElementById('build-number').textContent = d.sha || 'local';
+            })
+            .catch(() => {
+              document.getElementById('build-number').textContent = 'local';
+            });
+        </script>
       </footer>
       <script>
         const isMobile = navigator.userAgent.match(/Mobile/i);
