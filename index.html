@@ -77,6 +77,34 @@
         </p>
       </marquee>
       <details class="section">
+        <summary>Personal Projects</summary>
+        <p>
+          Check my last 
+          <select id="select" name="count" hx-post="/api/projects" hx-target="#projects"></select> 
+          <script>
+            const select = document.getElementById('select');
+            for (let i = 0; i<20; i++) {
+              const n = i + 1;
+              const o = document.createElement('option');
+              o.value = n
+              o.label = n;
+              o.selected = n === 3;
+              select.appendChild(o);
+            }
+          </script>
+          personal (public) projects.</p>
+        <table id="projects-table" class="projects-table">
+          <thead>
+            <th>Repository</th>
+            <th>Description</th>
+            <th>Languages</th>
+            <th>Site</th>
+          </thead>
+          <tbody id="projects" hx-post="/api/projects" hx-vals='{ "count": "3" }' hx-trigger="load once">
+          </tbody>
+        </table>
+      </details>
+      <details class="section">
         <summary>Work Experience</summary>
         <div>
           <script>
@@ -151,34 +179,6 @@
             </article>
           </div>
         </div>
-      </details>
-      <details class="section">
-        <summary>Personal Projects</summary>
-        <p>
-          Check my last 
-          <select id="select" name="count" hx-post="/api/projects" hx-target="#projects"></select> 
-          <script>
-            const select = document.getElementById('select');
-            for (let i = 0; i<20; i++) {
-              const n = i + 1;
-              const o = document.createElement('option');
-              o.value = n
-              o.label = n;
-              o.selected = n === 3;
-              select.appendChild(o);
-            }
-          </script>
-          personal projects.</p>
-        <table id="projects-table" class="projects-table">
-          <thead>
-            <th>Repository</th>
-            <th>Description</th>
-            <th>Languages</th>
-            <th>Site</th>
-          </thead>
-          <tbody id="projects" hx-post="/api/projects" hx-vals='{ "count": "3" }' hx-trigger="load once">
-          </tbody>
-        </table>
       </details>
       <details id="contact" class="section" hx-trigger="load once" hx-post="/api/contact" hx-target=".contact-target">
         <summary>Contact</summary>
