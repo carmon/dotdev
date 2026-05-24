@@ -10,8 +10,8 @@ At this point, the state-of-the-art proof-that-carmon-is-a-dev website here is u
 ### How to run
 
 __Requirements:__ 
-- node modules: `npm i`
-- vercel cli: `npm i -g vercel`
+- node modules: `pnpm i`
+- vercel cli: `pnpm i -g vercel`
 
 __Run locally__
 - On root dir run `vercel dev`
