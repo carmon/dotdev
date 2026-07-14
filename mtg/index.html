@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MTG Search — Scryfall Query Builder</title>
+  <link rel="stylesheet" href="mtg/styles.css" />
+  <link rel="preconnect" href="https://api.scryfall.com" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>MTG&nbsp;Search</h1>
+      <p class="tagline">A visual query builder for
+        <a href="https://scryfall.com/docs/syntax" target="_blank" rel="noopener">Scryfall search syntax</a>.
+      </p>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <!-- ============ FILTER PANEL ============ -->
+    <form id="builder" class="panel" autocomplete="off">
+      <!-- Name -->
+      <fieldset class="filter">
+        <legend>Name</legend>
+        <div class="row">
+          <input type="text" id="name" placeholder="e.g. lightning" />
+          <label class="chk"><input type="checkbox" id="name-exact" /> exact&nbsp;(!)</label>
+        </div>
+      </fieldset>
+
+      <!-- Colors -->
+      <fieldset class="filter">
+        <legend>Colors</legend>
+        <div class="row">
+          <select id="color-mode" title="Color vs. Color Identity">
+            <option value="c">Color</option>
+            <option value="id">Identity</option>
+          </select>
+          <select id="color-op" title="Comparison">
+            <option value=">=">at least</option>
+            <option value="=">exactly</option>
+            <option value="<=">at most</option>
+            <option value=":">contains (:)</option>
+          </select>
+        </div>
+        <div class="pills" id="color-pills">
+          <label class="pill w"><input type="checkbox" value="w" /><span>W</span></label>
+          <label class="pill u"><input type="checkbox" value="u" /><span>U</span></label>
+          <label class="pill b"><input type="checkbox" value="b" /><span>B</span></label>
+          <label class="pill r"><input type="checkbox" value="r" /><span>R</span></label>
+          <label class="pill g"><input type="checkbox" value="g" /><span>G</span></label>
+        </div>
+        <div class="pills">
+          <label class="pill c"><input type="checkbox" id="color-colorless" /><span>Colorless</span></label>
+          <label class="pill m"><input type="checkbox" id="color-multi" /><span>Multicolor</span></label>
+        </div>
+      </fieldset>
+
+      <!-- Type -->
+      <fieldset class="filter">
+        <legend>Type line</legend>
+        <div class="row">
+          <input type="text" id="type" placeholder="e.g. legendary creature goblin" />
+          <label class="chk"><input type="checkbox" id="type-neg" /> not</label>
+        </div>
+        <small class="hint">Space-separated; each word becomes a <code>t:</code> term.</small>
+      </fieldset>
+
+      <!-- Oracle text -->
+      <fieldset class="filter">
+        <legend>Oracle text</legend>
+        <div class="row">
+          <input type="text" id="oracle" placeholder='e.g. draw a card' />
+          <label class="chk"><input type="checkbox" id="oracle-neg" /> not</label>
+        </div>
+        <small class="hint">Use <code>~</code> for the card's own name.</small>
+      </fieldset>
+
+      <!-- Keyword ability -->
+      <fieldset class="filter">
+        <legend>Keyword ability</legend>
+        <input type="text" id="keyword" placeholder="e.g. flying, trample, flashback" />
+      </fieldset>
+
+      <!-- Mana -->
+      <fieldset class="filter">
+        <legend>Mana</legend>
+        <label class="sub">Mana cost <small>(symbols)</small></label>
+        <input type="text" id="manacost" placeholder="e.g. 2WW or {R/P}" />
+        <label class="sub">Mana value</label>
+        <div class="row">
+          <select id="mv-op" class="op">
+            <option value="">—</option>
+            <option value="=">=</option>
+            <option value=">">&gt;</option>
+            <option value="<">&lt;</option>
+            <option value=">=">&ge;</option>
+            <option value="<=">&le;</option>
+            <option value="!=">&ne;</option>
+          </select>
+          <input type="number" id="mv" min="0" step="1" placeholder="value" />
+        </div>
+      </fieldset>
+
+      <!-- Power / Toughness / Loyalty -->
+      <fieldset class="filter">
+        <legend>Power / Toughness / Loyalty</legend>
+        <div class="pt-grid">
+          <div>
+            <label class="sub">Power</label>
+            <div class="row">
+              <select class="op" data-stat="pow" data-role="op">
+                <option value="">—</option><option value="=">=</option><option value=">">&gt;</option>
+                <option value="<">&lt;</option><option value=">=">&ge;</option><option value="<=">&le;</option>
+              </select>
+              <input type="text" data-stat="pow" data-role="val" placeholder="n" />
+            </div>
+          </div>
+          <div>
+            <label class="sub">Toughness</label>
+            <div class="row">
+              <select class="op" data-stat="tou" data-role="op">
+                <option value="">—</option><option value="=">=</option><option value=">">&gt;</option>
+                <option value="<">&lt;</option><option value=">=">&ge;</option><option value="<=">&le;</option>
+              </select>
+              <input type="text" data-stat="tou" data-role="val" placeholder="n" />
+            </div>
+          </div>
+          <div>
+            <label class="sub">Loyalty</label>
+            <div class="row">
+              <select class="op" data-stat="loy" data-role="op">
+                <option value="">—</option><option value="=">=</option><option value=">">&gt;</option>
+                <option value="<">&lt;</option><option value=">=">&ge;</option><option value="<=">&le;</option>
+              </select>
+              <input type="text" data-stat="loy" data-role="val" placeholder="n" />
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Rarity -->
+      <fieldset class="filter">
+        <legend>Rarity</legend>
+        <div class="pills wrap-pills" id="rarity-pills">
+          <label class="pill"><input type="checkbox" value="common" /><span>Common</span></label>
+          <label class="pill"><input type="checkbox" value="uncommon" /><span>Uncommon</span></label>
+          <label class="pill"><input type="checkbox" value="rare" /><span>Rare</span></label>
+          <label class="pill"><input type="checkbox" value="mythic" /><span>Mythic</span></label>
+          <label class="pill"><input type="checkbox" value="special" /><span>Special</span></label>
+          <label class="pill"><input type="checkbox" value="bonus" /><span>Bonus</span></label>
+        </div>
+      </fieldset>
+
+      <!-- Set -->
+      <fieldset class="filter">
+        <legend>Set</legend>
+        <input type="text" id="set" placeholder="set code(s), e.g. war, neo" />
+        <small class="hint">Comma/space separated set codes → <code>e:</code>.</small>
+      </fieldset>
+
+      <!-- Format -->
+      <fieldset class="filter">
+        <legend>Format legality</legend>
+        <div class="row">
+          <select id="format-mode">
+            <option value="f">legal in</option>
+            <option value="banned">banned in</option>
+            <option value="restricted">restricted in</option>
+          </select>
+          <select id="format">
+            <option value="">—</option>
+            <option>standard</option><option>pioneer</option><option>modern</option>
+            <option>legacy</option><option>vintage</option><option>pauper</option>
+            <option>commander</option><option>oathbreaker</option><option>brawl</option>
+            <option>standardbrawl</option><option>historic</option><option>timeless</option>
+            <option>alchemy</option><option>penny</option><option>duel</option>
+            <option>premodern</option><option>oldschool</option><option>predh</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <!-- Price -->
+      <fieldset class="filter">
+        <legend>Price</legend>
+        <div class="row">
+          <select id="price-cur">
+            <option value="usd">USD</option>
+            <option value="eur">EUR</option>
+            <option value="tix">TIX</option>
+          </select>
+          <select id="price-op" class="op">
+            <option value="">—</option>
+            <option value=">">&gt;</option><option value="<">&lt;</option>
+            <option value=">=">&ge;</option><option value="<=">&le;</option><option value="=">=</option>
+          </select>
+          <input type="number" id="price-val" min="0" step="0.01" placeholder="value" />
+        </div>
+      </fieldset>
+
+      <!-- Artist -->
+      <fieldset class="filter">
+        <legend>Artist</legend>
+        <input type="text" id="artist" placeholder="e.g. Rebecca Guay" />
+      </fieldset>
+
+      <!-- is: toggles -->
+      <fieldset class="filter">
+        <legend>Attributes (is:)</legend>
+        <div class="pills wrap-pills" id="is-pills">
+          <label class="pill"><input type="checkbox" value="foil" /><span>Foil</span></label>
+          <label class="pill"><input type="checkbox" value="nonfoil" /><span>Nonfoil</span></label>
+          <label class="pill"><input type="checkbox" value="promo" /><span>Promo</span></label>
+          <label class="pill"><input type="checkbox" value="reprint" /><span>Reprint</span></label>
+          <label class="pill"><input type="checkbox" value="full" /><span>Full art</span></label>
+          <label class="pill"><input type="checkbox" value="digital" /><span>Digital</span></label>
+          <label class="pill"><input type="checkbox" value="spotlight" /><span>Story spotlight</span></label>
+          <label class="pill"><input type="checkbox" value="reserved" /><span>Reserved list</span></label>
+          <label class="pill"><input type="checkbox" value="commander" /><span>Can be commander</span></label>
+          <label class="pill"><input type="checkbox" value="funny" /><span>Funny / Un-set</span></label>
+        </div>
+      </fieldset>
+
+      <div class="panel-actions">
+        <button type="button" id="reset" class="btn ghost">Reset all</button>
+      </div>
+    </form>
+
+    <!-- ============ RESULTS / QUERY ============ -->
+    <section class="results-col">
+      <div class="query-bar">
+        <label for="query" class="query-label">Scryfall query</label>
+        <div class="query-row">
+          <textarea id="query" rows="2" spellcheck="false"
+            placeholder="Build using the panel, or type a raw Scryfall query…"></textarea>
+          <div class="query-assist">
+            <span class="assist-label">Groups:</span>
+            <select id="group-conn" title="How to join this group to the query">
+              <option value="and">AND</option>
+              <option value="or">OR</option>
+            </select>
+            <button type="button" id="add-group" class="btn small" title="Wrap the current panel filters in ( ) and append">+ Add filters as group</button>
+            <span class="assist-sep"></span>
+            <button type="button" id="a-paren" class="btn small mono" title="Wrap selection in parentheses">( )</button>
+            <button type="button" id="a-or" class="btn small mono" title="Insert OR">or</button>
+            <button type="button" id="a-not" class="btn small mono" title="Negate selection / caret">−</button>
+            <button type="button" id="a-copy" class="btn small" title="Copy query to clipboard">Copy</button>
+          </div>
+          <div class="query-controls">
+            <select id="order" title="Sort order">
+              <option value="">Sort: relevance</option>
+              <option value="name">Name</option>
+              <option value="cmc">Mana value</option>
+              <option value="power">Power</option>
+              <option value="toughness">Toughness</option>
+              <option value="rarity">Rarity</option>
+              <option value="color">Color</option>
+              <option value="released">Released</option>
+              <option value="usd">Price (USD)</option>
+              <option value="edhrec">EDHREC rank</option>
+              <option value="artist">Artist</option>
+            </select>
+            <select id="dir" title="Direction">
+              <option value="">Dir: auto</option>
+              <option value="asc">Asc</option>
+              <option value="desc">Desc</option>
+            </select>
+            <select id="unique" title="Uniqueness">
+              <option value="cards">Unique: cards</option>
+              <option value="prints">prints</option>
+              <option value="art">art</option>
+            </select>
+            <button type="button" id="search" class="btn primary">Search</button>
+            <a id="open-scryfall" class="btn ghost" target="_blank" rel="noopener">Open on Scryfall ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="results" class="card-grid"></div>
+      <div class="loadmore-wrap">
+        <button type="button" id="loadmore" class="btn" hidden>Load more</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Card detail modal -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+      <button type="button" class="modal-close" data-close aria-label="Close">×</button>
+      <div class="modal-body" id="modal-body"><!-- filled by JS --></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Card data &amp; images from the
+        <a href="https://scryfall.com/docs/api" target="_blank" rel="noopener">Scryfall API</a>.
+        Not affiliated with Scryfall or Wizards of the Coast.</p>
+    </div>
+  </footer>
+
+  <script src="mtg/app.js"></script>
+</body>
+</html>
